@@ -2,10 +2,10 @@ import time
 from Motor import *
 from ADC import *
 class Light:
-    def run(self):
+    def run(self, reverse=False):
         try:
             self.adc=Adc()
-            self.PWM=Motor()
+            self.PWM=Motor(reverse=reverse)
             self.PWM.setMotorModel(0,0,0,0)
             while True:
                 L = self.adc.recvADC(0)
@@ -28,7 +28,15 @@ class Light:
 
 if __name__=='__main__':
     print ('Program is starting ... ')
-    led_Car=Light()
+
+    from optparse import OptionParser
+
+    p = OptionParser()
+    p.add_option('-r','--reverse',action='store_true',dest='reverse',help='Reverse motor directions', default=False)
+
+    (opts, args) = p.parse_args()
+
+    led_Car=Light(reverse=opts.reverse)
     led_Car.run()
 
 

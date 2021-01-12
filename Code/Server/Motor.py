@@ -1,9 +1,11 @@
 import time
 from PCA9685 import PCA9685
 class Motor:
-    def __init__(self):
+    def __init__(self, reverse=False):
         self.pwm = PCA9685(0x40, debug=True)
         self.pwm.setPWMFreq(50)
+        self.__reverse = reverse
+        
     def duty_range(self,duty1,duty2,duty3,duty4):
         if duty1>4095:
             duty1=4095
@@ -69,11 +71,19 @@ class Motor:
             
  
     def setMotorModel(self,duty1,duty2,duty3,duty4):
+        if self.__reverse:
+            duty1 = -duty1
+            duty2 = -duty2
+            duty3 = -duty3
+            duty4 = -duty4
         duty1,duty2,duty3,duty4=self.duty_range(duty1,duty2,duty3,duty4)
         self.left_Upper_Wheel(duty1)
         self.left_Lower_Wheel(duty2)
         self.right_Upper_Wheel(duty3)
         self.right_Lower_Wheel(duty4)
+    
+    def setReverse(self,reverse):
+        self.__reverse = reverse
             
             
 PWM=Motor()          
@@ -91,6 +101,17 @@ def loop():
 def destroy():
     PWM.setMotorModel(0,0,0,0)                   
 if __name__=='__main__':
+    from optparse import OptionParser
+
+    p = OptionParser()
+    p.add_option('-r','--reverse',action='store_true',dest='reverse',help='Reverse motor directions', default=False)
+
+    (opts, args) = p.parse_args()
+
+
+    if opts.reverse:
+        PWM.setReverse(True)
+
     try:
         loop()
     except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.

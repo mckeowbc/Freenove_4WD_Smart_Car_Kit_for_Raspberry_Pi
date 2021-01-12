@@ -2,7 +2,7 @@ import time
 from Motor import *
 import RPi.GPIO as GPIO
 class Line_Tracking:
-    def __init__(self):
+    def __init__(self, reverse=False):
         self.IR01 = 14
         self.IR02 = 15
         self.IR03 = 23
@@ -10,6 +10,8 @@ class Line_Tracking:
         GPIO.setup(self.IR01,GPIO.IN)
         GPIO.setup(self.IR02,GPIO.IN)
         GPIO.setup(self.IR03,GPIO.IN)
+        PWM.setReverse(reverse)
+
     def run(self):
         while True:
             self.LMR=0x00
@@ -32,11 +34,24 @@ class Line_Tracking:
             elif self.LMR==7:
                 #pass
                 PWM.setMotorModel(0,0,0,0)
+
+    def setReverse(self,reverse):
+        PWM.setReverse(reverse)
             
 infrared=Line_Tracking()
 # Main program logic follows:
 if __name__ == '__main__':
     print ('Program is starting ... ')
+    from optparse import OptionParser
+
+    p = OptionParser()
+    p.add_option('-r','--reverse',action='store_true',dest='reverse',help='Reverse motor directions', default=False)
+
+    (opts, args) = p.parse_args()
+
+    if opts.reverse:
+        infrared.setReverse(opts.reverse)    
+
     try:
         infrared.run()
     except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program  will be  executed.

@@ -4,13 +4,15 @@ import RPi.GPIO as GPIO
 from servo import *
 from PCA9685 import PCA9685
 class Ultrasonic:
-    def __init__(self):
+    def __init__(self, reverse=False):
         GPIO.setwarnings(False)
         self.trigger_pin = 27
         self.echo_pin = 22
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.trigger_pin,GPIO.OUT)
         GPIO.setup(self.echo_pin,GPIO.IN)
+        self.__reverse = reverse
+
     def send_trigger_pulse(self):
         GPIO.output(self.trigger_pin,True)
         time.sleep(0.00015)
@@ -55,9 +57,12 @@ class Ultrasonic:
                 PWM.setMotorModel(-1500,-1500,1500,1500)
         else :
             self.PWM.setMotorModel(600,600,600,600)
+
+    def setReverse(self,reverse):
+        self.__reverse = reverse
                 
     def run(self):
-        self.PWM=Motor()
+        self.PWM=Motor(reverse=self.__reverse)
         self.pwm_S=Servo()
         for i in range(30,151,60):
                 self.pwm_S.setServoPwm('0',i)
@@ -96,6 +101,17 @@ ultrasonic=Ultrasonic()
 # Main program logic follows:
 if __name__ == '__main__':
     print ('Program is starting ... ')
+
+    from optparse import OptionParser
+
+    p = OptionParser()
+    p.add_option('-r','--reverse',action='store_true',dest='reverse',help='Reverse motor directions', default=False)
+
+    (opts, args) = p.parse_args()
+
+    if opts.reverse:
+        ultrasonic.setReverse(opts.reverse)
+
     try:
         ultrasonic.run()
     except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.

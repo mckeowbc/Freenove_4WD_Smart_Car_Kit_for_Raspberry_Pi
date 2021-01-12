@@ -22,8 +22,8 @@ from threading import Thread
 from Command import COMMAND as cmd
 
 class Server:   
-    def __init__(self):
-        self.PWM=Motor()
+    def __init__(self,reverse=False):
+        self.PWM=Motor(reverse=reverse)
         self.servo=Servo()
         self.led=Led()
         self.ultrasonic=Ultrasonic()
